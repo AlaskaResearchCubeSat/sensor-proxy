@@ -10,6 +10,7 @@
 #include <Error.h>
 #include <i2c.h>
 #include "sensor-interface.h"
+#include "Error_src.h"
 
 typedef struct{
   const char *name;
@@ -135,7 +136,7 @@ int restCmd(char **argv,unsigned short argc){
     //wait for UART buffer to empty
     while(UCA1_CheckBusy());
     //write to WDTCTL without password causes PUC
-    WDT_RESET();
+    reset(ERR_LEV_INFO,SENP_ERR_SRC_CMD,CMD_ERR_RESET,0);
     //Never reached due to reset
     puts("Error : Reset Failed!\r");
   }
