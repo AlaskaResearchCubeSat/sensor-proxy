@@ -54,19 +54,6 @@ unsigned char getI2C_addr(char *str,short res,const SYM_ADDR *syms){
   //check for errors
   if(end==str){
     //check for symbolic matches
-    /*if(!strcmp(str,"LEDL")){
-      return BUS_ADDR_LEDL;
-    }else if(!strcmp(str,"ACDS")){
-      return BUS_ADDR_ACDS;
-    }else if(!strcmp(str,"COMM")){
-      return BUS_ADDR_COMM;
-    }else if(!strcmp(str,"IMG")){
-      return BUS_ADDR_IMG;
-    }else if(!strcmp(str,"CDH")){
-      return BUS_ADDR_CDH;
-    }else if(!strcmp(str,"GC")){
-      return BUS_ADDR_GC;
-    }*/
     if(syms!=NULL){
       for(i=0;syms[i].name!=NULL && syms[i].addr!=0;i++){
         if(!strcmp(str,syms[i].name)){
