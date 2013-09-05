@@ -22,7 +22,7 @@ char *err_decode(char buf[150], unsigned short src,int err, unsigned short arg){
         return buf;
       }
     break;
-    case SENP_ERR_SRC_CMD:
+    case ERR_SRC_CMD:
       switch(err){
         case CMD_ERR_RESET:
           return "Command Line : Commanded reset";
