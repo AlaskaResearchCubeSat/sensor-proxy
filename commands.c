@@ -117,13 +117,77 @@ int SR_Cmd(char **argv,unsigned short argc){
   return 0;
 }
 
+int gain_Cmd(char **argv,unsigned short argc){
+  #ifdef MAG_ADC_GAIN
+    if(argc>0){
+      printf("Error : gain has been hard coded %s takes no arguments\r\n",argv[0]);
+      return 1;
+    }
+    switch(MAG_ADC_GAIN){
+      case LTC24xx_GAIN1:
+        printf("ADC gain = 1\r\n");
+      break;
+      case LTC24xx_GAIN4:
+        printf("ADC gain = 4\r\n");
+      break;
+      case LTC24xx_GAIN8:
+        printf("ADC gain = 8\r\n");
+      break;
+      case LTC24xx_GAIN16:
+        printf("ADC gain = 16\r\n");
+      break;
+      case LTC24xx_GAIN32:
+        printf("ADC gain = 32\r\n");
+      break;
+      case LTC24xx_GAIN64:
+        printf("ADC gain = 64\r\n");
+      break;
+      case LTC24xx_GAIN128:
+        printf("ADC gain = 128\r\n");
+      break;
+      case LTC24xx_GAIN264:
+        printf("ADC gain = 264\r\n");
+      break;
+      default:
+        printf("Error : unknown hardcoded gain\r\n");
+      break;
+    }
+  #else
+    int gain;
+    if(argc>1){
+      printf("Error : Too many Arguments\r\n");
+      return 2;
+    }
+    if(argc==1){
+      gain=atoi(argv[1]);
+      switch(gain){
+        case 1:
+        case 4:
+        case 8:
+        case 16:
+        case 32:
+        case 64:
+        case 128:
+        case 264:
+        break;
+        default:
+          printf("Error : %i is not a valid gain fo the LTC2487\r\n");
+          return 3;
+      }
+      mag_ADC_gain=gain;
+   }
+   printf("ADC gain = %u\r\n",mag_ADC_gain);
+  #endif  
+}
+
 //table of commands with help
 const CMD_SPEC cmd_tbl[]={{"help"," [command]\r\n\t""get a list of commands or help on a spesific command.",helpCmd},
                          CTL_COMMANDS,ARC_COMMANDS,ARC_ASYNC_PROXY_COMMAND,REPLAY_ERROR_COMMAND,ERROR_LOG_LEVEL_COMMAND,I2C_SCAN_COMMAND,
                          {"read","\r\n\t""Trigger a sensor read",readCmd},
-                         {"mag","\r\n\t""Read From The magnetomitor",magCmd},
+                         {"mag","\r\n\t""Read From The magnetometer",magCmd},
                          {"run","[time count]\r\n\t""Start taking sensor readings",run_sensors_Cmd},
                          {"stop","\r\n\t""stop taking sensor readings",stop_sensors_Cmd},
                          {"SR","\r\n\t""Set pulse, sample, reset pulse, sample",SR_Cmd},
+                         {"gain","[gain]\r\n\t""get/set ADC gain for magnetometer",gain_Cmd},
                          //end of list
                          {NULL,NULL,NULL}};

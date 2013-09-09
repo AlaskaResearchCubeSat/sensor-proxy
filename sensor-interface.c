@@ -18,6 +18,7 @@ CTL_EVENT_SET_t sens_ev;
 //the time that the ADC can next be sampled
 CTL_TIME_t adc_ready_time=153;
 
+unsigned short mag_ADC_gain=64;
 
 //an error occured take appropriat action
 void handle_sensor_error(int error){
@@ -138,7 +139,40 @@ short do_conversion(void){
   ctl_timeout_wait(ctl_get_current_time()+2);
   //configure for first conversion use channel 0
   txbuf[0]=LTC24XX_PRE|LTC24XX_EN|MAG_A_CH;
-  txbuf[1]=LTC24xx_EN2|LTC24xx_FA|MAG_ADC_GAIN;                   
+  #ifdef MAG_ADC_GAIN
+    txbuf[1]=LTC24xx_EN2|LTC24xx_FA|MAG_ADC_GAIN;                   
+  #else
+    txbuf[1]=LTC24xx_EN2|LTC24xx_FA;
+    switch(mag_ADC_gain){
+      case 1:
+        txbuf[1]|=LTC24xx_GAIN1;
+      break;
+      case 4:
+        txbuf[1]|=LTC24xx_GAIN4;
+      break;
+      case 8:
+        txbuf[1]|=LTC24xx_GAIN8;
+      break;
+      case 16:
+        txbuf[1]|=LTC24xx_GAIN16;
+      break;
+      case 32:
+        txbuf[1]|=LTC24xx_GAIN32;
+      break;
+      case 64:
+        txbuf[1]|=LTC24xx_GAIN64;
+      break;
+      case 128:
+        txbuf[1]|=LTC24xx_GAIN128;
+      break;
+      case 264:
+        txbuf[1]|=LTC24xx_GAIN264;
+      break;
+      default:
+        report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_BAD_GAIN,mag_ADC_gain);
+        return 1;
+    }
+  #endif
   if((res=i2c_tx(addr,txbuf,2))<0){
     //perhaps a conversion is in progress, wait for it to complete
     ctl_timeout_wait(ctl_get_current_time()+153);    //wait about 150ms
@@ -216,7 +250,40 @@ short single_sample(unsigned short addr,long *dest){
   meas_LED_on();
   //configure for first conversion convert in the A-axis
   txbuf[0]=LTC24XX_PRE|LTC24XX_EN|MAG_A_CH;
-  txbuf[1]=LTC24xx_EN2|LTC24xx_FA|MAG_ADC_GAIN;                   
+  #ifdef MAG_ADC_GAIN
+    txbuf[1]=LTC24xx_EN2|LTC24xx_FA|MAG_ADC_GAIN;                   
+  #else
+    txbuf[1]=LTC24xx_EN2|LTC24xx_FA;
+    switch(mag_ADC_gain){
+      case 1:
+        txbuf[1]|=LTC24xx_GAIN1;
+      break;
+      case 4:
+        txbuf[1]|=LTC24xx_GAIN4;
+      break;
+      case 8:
+        txbuf[1]|=LTC24xx_GAIN8;
+      break;
+      case 16:
+        txbuf[1]|=LTC24xx_GAIN16;
+      break;
+      case 32:
+        txbuf[1]|=LTC24xx_GAIN32;
+      break;
+      case 64:
+        txbuf[1]|=LTC24xx_GAIN64;
+      break;
+      case 128:
+        txbuf[1]|=LTC24xx_GAIN128;
+      break;
+      case 264:
+        txbuf[1]|=LTC24xx_GAIN264;
+      break;
+      default:
+        report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_BAD_GAIN,mag_ADC_gain);
+        return 1;
+    }
+  #endif  
   if((res=i2c_tx(addr,txbuf,2))<0){
     if(res==I2C_ERR_NACK){
       //perhaps a conversion is in progress, wait for it to complete

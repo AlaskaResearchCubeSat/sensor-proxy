@@ -16,7 +16,7 @@
   #define MAG_A_CH        LTC24xx_CH_1
   #define MAG_B_CH        LTC24xx_CH_0
   
-  #define MAG_ADC_GAIN    LTC24xx_GAIN64
+  //#define MAG_ADC_GAIN    LTC24xx_GAIN64
   //#define MAG_ADC_GAIN    LTC24xx_GAIN128
   
   //gain of magnetomitor amplifier
@@ -28,7 +28,7 @@
   #define MAG_SENS    (1e-3)            // mV/V/Gauss
   
   //error codes for sensor functions
-  enum{SENS_ERR_SETUP,SENS_ERR_CONV_READ} ;
+  enum{SENS_ERR_SETUP,SENS_ERR_CONV_READ,SENS_ERR_BAD_GAIN} ;
 
   
   //TESTING: trigger a sensor read
@@ -52,5 +52,7 @@
   short single_sample(unsigned short addr,long *dest);
 
   extern unsigned short mag_addr;
+
+  extern unsigned short mag_ADC_gain;
 
 #endif

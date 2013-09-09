@@ -16,13 +16,14 @@
 #define LTC24xx_GS1     0x02
 #define LTC24xx_GS0     0x01
 
+#define LTC24xx_GAIN1       (0)
 #define LTC24xx_GAIN4       (LTC24xx_GS0)
 #define LTC24xx_GAIN8       (LTC24xx_GS1)
 #define LTC24xx_GAIN16      (LTC24xx_GS1|LTC24xx_GS0)
 #define LTC24xx_GAIN32      (LTC24xx_GS2)
 #define LTC24xx_GAIN64      (LTC24xx_GS2|LTC24xx_GS0)
 #define LTC24xx_GAIN128     (LTC24xx_GS2|LTC24xx_GS1)
-#define LTC24xx_GAIN256     (LTC24xx_GS2|LTC24xx_GS1|LTC24xx_GS0)
+#define LTC24xx_GAIN264     (LTC24xx_GS2|LTC24xx_GS1|LTC24xx_GS0)
 
 //address for all LTC24XX ADC's
 #define LTC24XX_GLOBAL_ADDR 0x77
