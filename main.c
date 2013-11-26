@@ -160,7 +160,7 @@ int main(void){
   //setup UCA1 UART
   UCA1_init_UART();
   //setup baud rate for Bluetooth
-  UCA1_BR57600();
+  //UCA1_BR57600();
 
   //init I2C interface
   initI2C();
