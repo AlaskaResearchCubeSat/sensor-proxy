@@ -42,7 +42,7 @@
 
   short do_conversion(void);
 
-  extern unsigned long magMem[2];
+  extern unsigned long magMem[12];
 
 
   void run_sensors(unsigned short time,short count);
@@ -50,8 +50,6 @@
   void stop_sensors(void);
 
   short single_sample(unsigned short addr,long *dest);
-
-  extern unsigned short mag_addr;
 
   extern unsigned short mag_ADC_gain;
 

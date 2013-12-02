@@ -85,7 +85,8 @@ long adc16Val(unsigned char *dat){
   return val;
 }
 
-unsigned long magMem[2];
+unsigned long magMem[12];
+unsigned short magFlags;
 
 //LED stuff
 void meas_LED_on(void){
@@ -112,16 +113,18 @@ void com_err_LED_off(void){
   P7OUT&=~BIT4;
 }
 
-//address for magnetomitor
-//TODO: in future this will go away and all addresses will be read
-unsigned short mag_addr=0x14;
+//address for magnetomitor        X+   X-   Y+   Y-   Z+   Z-
+const unsigned char mag_addrs[6]={0x14,0x16,0x26,0x34,0x25,0x24};
+//indices for first magnetometer axis
+const int           a_idx[6]    ={4   ,5   ,0   ,1   ,2   ,3   };
+//indices for second magnetometer axis
+const int           b_idx[6]    ={8   ,9   ,10  ,11  ,6   ,7   };
 
 //take a reading from the magnetomitor ADC
 short do_conversion(void){
   long aval,bval;
   unsigned char rxbuf[4],txbuf[4];
-  unsigned short addr=mag_addr;
-  int res;
+  int res,i;
   CTL_TIME_t ct;
   //get current time
   ct=ctl_get_current_time();
@@ -173,19 +176,22 @@ short do_conversion(void){
         return 1;
     }
   #endif
-  if((res=i2c_tx(addr,txbuf,2))<0){
+  //send setup message to global address
+  if((res=i2c_tx(LTC24XX_GLOBAL_ADDR,txbuf,2))<0){
     //perhaps a conversion is in progress, wait for it to complete
     ctl_timeout_wait(ctl_get_current_time()+153);    //wait about 150ms
     //report a warning
     report_error(ERR_LEV_WARNING,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_SETUP,res);
     //try sending again
-    if((res=i2c_tx(addr,txbuf,2))<0){
+    if((res=i2c_tx(LTC24XX_GLOBAL_ADDR,txbuf,2))<0){
       //report error
       report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_SETUP,res);
       //turn on error LED
       sens_err_LED_on();
       //turn LED off, done measuring
       meas_LED_off();
+      //clear flags
+      magFlags=0;
       //TODO : provide real error codes
       return 2;
     }
@@ -194,38 +200,46 @@ short do_conversion(void){
   ctl_timeout_wait(ctl_get_current_time()+153);    //wait about 150ms
   //config for next conversion use channel 1
   txbuf[0]=LTC24XX_PRE|LTC24XX_EN|MAG_B_CH;
-  //read in data and start next conversion
-  if((res=i2c_txrx(addr,txbuf,1,rxbuf,3))<0){
-    //report error
-    report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
-    //turn on error LED
-    sens_err_LED_on();
-    //turn LED off, done measuring
-    meas_LED_off();
-    //TODO : provide real error codes
-    return 2;
+  for(i=0;i<6;i++){
+    //read in data and start next conversion
+    if((res=i2c_txrx(mag_addrs[i],txbuf,1,rxbuf,3))<0){
+      //report error
+      report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
+      //turn on error LED
+      sens_err_LED_on();
+      //clear value
+      magMem[a_idx[i]]=0;
+      //clear valid flag
+      magFlags&=~(1<<a_idx[i]);
+    }else{
+      //get result
+      magMem[a_idx[i]]=adc16Val(rxbuf);
+      //set valid flag
+      magFlags|= (1<<a_idx[i]);
+    }
   }
-  //get result
-  aval=adc16Val(rxbuf);
   //wait for conversion to complete
   ctl_timeout_wait(ctl_get_current_time()+153);    //wait about 150ms
-  //read in data
-  if((res=i2c_rx(addr,rxbuf,3))<0){
-    //report error
-    report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
-    //turn on error LED
-    sens_err_LED_on();
-    //turn LED off, done measuring
-    meas_LED_off();
-    //TODO : provide real error codes
-    return 2;
+  for(i=0;i<6;i++){
+    //read in data
+    if((res=i2c_rx(mag_addrs[i],rxbuf,3))<0){
+      //report error
+      report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
+      //turn on error LED
+      sens_err_LED_on();
+      //clear value
+      magMem[b_idx[i]]=0;
+      //clear valid flag
+      magFlags&=~(1<<b_idx[i]);
+    }else{
+      //get result
+      magMem[b_idx[i]]=adc16Val(rxbuf);
+      //set valid flag
+      magFlags|= (1<<b_idx[i]);
+    }
   }
   //generate reset pulse
   MAG_SR_OUT&=~MAG_SR_PIN;
-  //print result
-  bval=adc16Val(rxbuf);
-  magMem[0]=aval;
-  magMem[1]=bval;
   //turn LED off, done measuring
   meas_LED_off();
   //get time that ADC can next be read
@@ -461,7 +475,8 @@ short single_sample(unsigned short addr,long *dest){
 void ACDS_sensor_interface(void *p) __toplevel{
   unsigned int e;
   unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+BUS_I2C_CRC_LEN],*ptr;
-  int i,res;
+  int i,j,res;
+  const char axc[3]={'X','Y','Z'};
   //initialize event set
   ctl_events_init(&sens_ev,0);
   //stop sensors
@@ -474,7 +489,17 @@ void ACDS_sensor_interface(void *p) __toplevel{
       res=do_conversion();
       //check result
       if(res==0){
-        printf("%f %f\r\n",ADCtoGauss(magMem[0])/2,ADCtoGauss(magMem[1])/2);
+        for(i=0;i<3;i++){
+          printf("%c-Axis :\t",axc[i]);
+          for(j=0;j<4;j++){
+            if(magFlags&(1<<(i*4+j))){
+              printf("% f\t",ADCtoGauss(magMem[i*4+j])/2);
+            }else{
+              printf("Error\t");
+            }
+          }
+          printf("\r\n");
+        }
         //setup packet 
         ptr=BUS_cmd_init(buff,CMD_MAG_DATA);
         //copy data into packet

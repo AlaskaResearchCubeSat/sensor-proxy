@@ -24,7 +24,8 @@ int readCmd(char **argv,unsigned short argc){
 int magCmd(char **argv,unsigned short argc){
   signed short set[2],reset[2],os[2],val[2];
   unsigned short single=0,gauss=0,addr=0x14;
-  unsigned char c;
+  unsigned char c,mag_addr=0x14;
+  long result[2];
   float time=0;
   int i,res;
 
@@ -44,15 +45,15 @@ int magCmd(char **argv,unsigned short argc){
   }
   //run until abort is detected
   do{
-    res=do_conversion();
+    res=single_sample(mag_addr,result);
     if(res!=0){
       printf("Error encountered. Aborting\r\n");
       break;
     }
     if(gauss){
-      printf("%f %f\r\n",ADCtoGauss(magMem[0])/2,ADCtoGauss(magMem[1])/2);
+      printf("%f %f\r\n",ADCtoGauss(result[0])/2,ADCtoGauss(result[1])/2);
     }else{
-      printf("%li %li\r\n",magMem[0],magMem[1]);
+      printf("%li %li\r\n",result[0],result[1]);
     }
     c=UCA1_CheckKey();
   }while(!(c==0x03  || c=='Q' || c=='q' || single));
