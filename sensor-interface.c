@@ -244,8 +244,16 @@ short do_conversion(void){
   meas_LED_off();
   //get time that ADC can next be read
   adc_ready_time=ctl_get_current_time()+153;
-  //TODO: provide real return codes
-  return 0;
+  //check for data in all 3 axis
+  if((magFlags&MAG_FLAGS_X) && (magFlags&MAG_FLAGS_Y) && (magFlags&MAG_FLAGS_Z)){
+    //TODO: provide real return codes
+    return 0;
+  }else{
+    //report error
+    report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_INSUFFICIENT_DATA,magFlags);
+    //TODO: provide real return codes
+    return -1;
+  }
 }
 
 

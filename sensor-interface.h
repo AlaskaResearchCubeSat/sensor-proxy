@@ -28,7 +28,26 @@
   #define MAG_SENS    (1e-3)            // mV/V/Gauss
   
   //error codes for sensor functions
-  enum{SENS_ERR_SETUP,SENS_ERR_CONV_READ,SENS_ERR_BAD_GAIN} ;
+  enum{SENS_ERR_SETUP,SENS_ERR_CONV_READ,SENS_ERR_BAD_GAIN,SENS_ERR_INSUFFICIENT_DATA} ;
+    
+  //flags for magFLags
+  #define MAG_FLAGS_X0      0x0001
+  #define MAG_FLAGS_X1      0x0002
+  #define MAG_FLAGS_X2      0x0004
+  #define MAG_FLAGS_X3      0x0008
+  #define MAG_FLAGS_X       (MAG_FLAGS_X0|MAG_FLAGS_X1|MAG_FLAGS_X2|MAG_FLAGS_X3)
+  
+  #define MAG_FLAGS_Y0      0x0010
+  #define MAG_FLAGS_Y1      0x0020
+  #define MAG_FLAGS_Y2      0x0040
+  #define MAG_FLAGS_Y3      0x0080
+  #define MAG_FLAGS_Y       (MAG_FLAGS_Y0|MAG_FLAGS_Y1|MAG_FLAGS_Y2|MAG_FLAGS_Y3)
+  
+  #define MAG_FLAGS_Z0      0x0100
+  #define MAG_FLAGS_Z1      0x0200
+  #define MAG_FLAGS_Z2      0x0400
+  #define MAG_FLAGS_Z3      0x0800
+  #define MAG_FLAGS_Z       (MAG_FLAGS_Z0|MAG_FLAGS_Z1|MAG_FLAGS_Z2|MAG_FLAGS_Z3)
 
   
   //TESTING: trigger a sensor read

@@ -23,6 +23,9 @@ char *err_decode(char buf[150], unsigned short src,int err, unsigned short arg){
         case SENS_ERR_BAD_GAIN:
           sprintf(buf,"Sensor I2C : Invalid Gain %u",arg);
         return buf;
+        case SENS_ERR_INSUFFICIENT_DATA:
+          sprintf(buf,"Sensor I2C : Insufficient Data, Flags = 0x%04X",arg);
+        return buf;
       }
     break;
     case ERR_SRC_CMD:
