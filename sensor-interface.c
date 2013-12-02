@@ -204,7 +204,7 @@ short do_conversion(void){
     //read in data and start next conversion
     if((res=i2c_txrx(mag_addrs[i],txbuf,1,rxbuf,3))<0){
       //report error
-      report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
+      report_error(ERR_LEV_WARNING,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
       //turn on error LED
       sens_err_LED_on();
       //clear value
@@ -224,7 +224,7 @@ short do_conversion(void){
     //read in data
     if((res=i2c_rx(mag_addrs[i],rxbuf,3))<0){
       //report error
-      report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
+      report_error(ERR_LEV_WARNING,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
       //turn on error LED
       sens_err_LED_on();
       //clear value
