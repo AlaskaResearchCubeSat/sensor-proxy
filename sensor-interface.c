@@ -501,9 +501,9 @@ void ACDS_sensor_interface(void *p) __toplevel{
           printf("%c-Axis :\t",axc[i]);
           for(j=0;j<4;j++){
             if(magFlags&(1<<(i*4+j))){
-              printf("% f\t",ADCtoGauss(magMem[i*4+j])/2);
+              printf("%- 12f\t",ADCtoGauss(magMem[i*4+j])/2);
             }else{
-              printf("Error\t");
+              printf(" %-11s\t","Error");
             }
           }
           printf("\r\n");
