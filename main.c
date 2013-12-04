@@ -24,11 +24,9 @@ CTL_EVENT_SET_t cmd_parse_evt;
 
 unsigned char buffer[80];
 
-int remote=0;
-
 //set printf and friends to send chars out UCA1 uart
 int __putchar(int c){
-  if(remote){
+  if(async_isOpen()){
      return EOF;
   }
   return UCA1_TxChar(c);
@@ -136,10 +134,6 @@ void sub_events(void *p) __toplevel{
       //print message
       printf("Async Opened from 0x%02X\r\n",async_addr);*/
       async_close();
-    }
-    if(e&SUB_EV_ASYNC_CLOSE){
-      //no longer using remote interface
-      remote=0;
     }
   }
 }
