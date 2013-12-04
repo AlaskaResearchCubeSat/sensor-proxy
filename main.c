@@ -24,11 +24,9 @@ CTL_EVENT_SET_t cmd_parse_evt;
 
 unsigned char buffer[80];
 
-int remote=0;
-
 //set printf and friends to send chars out UCA1 uart
 int __putchar(int c){
-  if(remote){
+  if(async_isOpen()){
      return EOF;
   }
   return UCA1_TxChar(c);
@@ -127,19 +125,8 @@ void sub_events(void *p) __toplevel{
       puts("SPI bad CRC\r");
     }
     if(e&SUB_EV_ASYNC_OPEN){
-      //kill off the terminal
-      /*ctl_task_remove(&tasks[1]);
-      //setup closed event
-      async_setup_close_event(&SUB_events,SUB_EV_ASYNC_CLOSE);
-      //setup UART terminal        
-      ctl_task_run(&tasks[1],2,terminal,"\rRemote Terminal started\r\n","async_terminal",sizeof(stack2)/sizeof(stack2[0])-2,stack2+1,0);
-      //print message
-      printf("Async Opened from 0x%02X\r\n",async_addr);*/
+      //async connection not possible, close connection
       async_close();
-    }
-    if(e&SUB_EV_ASYNC_CLOSE){
-      //no longer using remote interface
-      remote=0;
     }
   }
 }
