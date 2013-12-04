@@ -482,7 +482,7 @@ short single_sample(unsigned short addr,long *dest){
 
 void ACDS_sensor_interface(void *p) __toplevel{
   unsigned int e;
-  unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+BUS_I2C_CRC_LEN],*ptr;
+  unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+2+BUS_I2C_CRC_LEN],*ptr;
   int i,j,res;
   const char axc[3]={'X','Y','Z'};
   //initialize event set
@@ -510,10 +510,12 @@ void ACDS_sensor_interface(void *p) __toplevel{
         }
         //setup packet 
         ptr=BUS_cmd_init(buff,CMD_MAG_DATA);
+        //add magFlags to packet
+        *(unsigned short*)ptr=magFlags;
         //copy data into packet
-        memcpy(ptr,magMem,sizeof(magMem));
+        memcpy(ptr+2,magMem,sizeof(magMem));
         //send packet
-        res=BUS_cmd_tx(BUS_ADDR_ACDS,buff,sizeof(magMem),0,BUS_I2C_SEND_FOREGROUND);
+        res=BUS_cmd_tx(BUS_ADDR_ACDS,buff,sizeof(magMem)+2,0,BUS_I2C_SEND_FOREGROUND);
         //check result
         if(res<0){
           report_error(ERR_LEV_ERROR,SENP_ERR_SRC_ACDS_I2C,res,0);
