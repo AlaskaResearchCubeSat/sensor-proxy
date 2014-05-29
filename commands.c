@@ -23,7 +23,7 @@ int readCmd(char **argv,unsigned short argc){
 //read data from the magnetometer and print to terminal
 int magCmd(char **argv,unsigned short argc){
   signed short set[2],reset[2],os[2],val[2];
-  unsigned short single=0,gauss=0,addr=0x14;
+  unsigned short single=0,gauss=0,addr=0x14,all=0;
   unsigned char c,mag_addr=0x14;
   long result[2];
   float time=0;
@@ -32,11 +32,13 @@ int magCmd(char **argv,unsigned short argc){
   //parse arguments
   for(i=1;i<=argc;i++){
     if(!strcmp("single",argv[i])){
-      single=1;
+        single=1;
     }else if(!strcmp("gauss",argv[i])){
-      gauss=1;
+        gauss=1;
+    }else if(!strcmp("all",argv[i])){
+        all=1;
     }else if((addr=getI2C_addr(argv[i],0,magAddrSym))!=0xFF){
-      mag_addr=addr;
+        mag_addr=addr;
     }else{
       
       printf("Error Unknown argument \'%s\'.\r\n",argv[i]);
@@ -44,20 +46,47 @@ int magCmd(char **argv,unsigned short argc){
     }
   }
   //run until abort is detected
-  do{
-    res=single_sample(mag_addr,result);
-    if(res!=0){
-      printf("Error encountered. Aborting\r\n");
-      break;
-    }
-    if(gauss){
-      printf("%f %f\r\n",ADCtoGauss(result[0])/2,ADCtoGauss(result[1])/2);
-    }else{
-      printf("%li %li\r\n",result[0],result[1]);
-    }
-    c=UCA1_CheckKey();
-  }while(!(c==0x03  || c=='Q' || c=='q' || single));
-  return 0;
+    do{
+        if(all){
+            //read from all sensors
+            res=do_conversion();
+        }else{
+            //read from one sensor
+            res=single_sample(mag_addr,result);
+        }
+        //check for error
+        if(res!=0){
+            printf("Error encountered. Aborting\r\n");
+            break;
+        }
+        
+        if(all){
+            for(i=0;i<12;i++){
+                //check if reading is valid
+                if(magFlags&(1<<i)){
+                    //valid, print it
+                    if(gauss){
+                        printf("%f ",ADCtoGauss(magMem[i])/2);
+                    }else{
+                        printf("%li ",magMem[i]);
+                    }
+                }else{
+                    //invalid, print NaN
+                    printf("NaN ");
+                }
+            }
+            //print newline
+            printf("\r\n");    
+        }else{
+            if(gauss){
+                printf("%f %f\r\n",ADCtoGauss(result[0])/2,ADCtoGauss(result[1])/2);
+            }else{
+                printf("%li %li\r\n",result[0],result[1]);
+            }
+        }
+        c=UCA1_CheckKey();
+    }while(!(c==0x03  || c=='Q' || c=='q' || single));
+    return 0;
 }
 
 //start taking sensor data and sending to ACDS

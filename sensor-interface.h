@@ -62,6 +62,7 @@
   short do_conversion(void);
 
   extern unsigned long magMem[12];
+  extern unsigned short magFlags;
 
 
   void run_sensors(unsigned short time,short count);
