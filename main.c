@@ -32,6 +32,11 @@ int __putchar(int c){
   return UCA1_TxChar(c);
 }
 
+//set scanf and friends to read chars from UAC1 uart
+int __getchar(void){
+    return UCA1_Getc();
+}
+
 //handle subsystem specific commands
 int SUB_parseCmd(unsigned char src,unsigned char cmd,unsigned char *dat,unsigned short len){
   int i;
