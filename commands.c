@@ -182,7 +182,7 @@ int gain_Cmd(char **argv,unsigned short argc){
 
 //table of commands with help
 const CMD_SPEC cmd_tbl[]={{"help"," [command]\r\n\t""get a list of commands or help on a spesific command.",helpCmd},
-                         CTL_COMMANDS,ARC_COMMANDS,ARC_ASYNC_PROXY_COMMAND,REPLAY_ERROR_COMMAND,ERROR_LOG_LEVEL_COMMAND,I2C_SCAN_COMMAND,
+                         CTL_COMMANDS,ARC_COMMANDS,ARC_ASYNC_PROXY_COMMAND,REPLAY_ERROR_COMMAND,ERROR_LOG_LEVEL_COMMAND,I2C_SCAN_COMMAND,ARC_SPI_DREAD,
                          {"read","\r\n\t""Trigger a sensor read",readCmd},
                          {"mag","\r\n\t""Read From The magnetometer",magCmd},
                          {"run","[time count]\r\n\t""Start taking sensor readings",run_sensors_Cmd},
