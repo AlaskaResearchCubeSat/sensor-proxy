@@ -24,5 +24,5 @@
   <configuration Name="Debug" build_debug_information="Yes" hidden="Yes"/>
   <configuration Name="MSP430 Release" inherited_configurations="MSP430;Release" linker_additional_files="Z:/Software/lib/BUSlib_Release.hza;Z:/Software/lib/termlib_Release.hza;Z:/Software/lib/commandLib_Release.hza;Z:/Software/lib/UART_UCA1_Release.hza;Z:/Software/lib/I2Clib_Release.hza;Z:/Software/lib/Error_printf_Release.hza"/>
   <configuration Name="Release" build_debug_information="No" c_preprocessor_definitions="NDEBUG" hidden="Yes" optimize_block_locality="Yes" optimize_copy_propagation="Yes" optimize_cross_calling="Standard" optimize_cross_jumping="Yes" optimize_dead_code="Yes" optimize_jump_chaining="Yes" optimize_jump_threading="Yes" optimize_tail_merging="Yes"/>
-  <configuration Name="Common" c_system_include_directories="$(StudioDir)/include;$(PackagesDir)/include;$(StudioDir)/ctl/include;Z:\\Software\\include" linker_printf_fp_enabled="Yes"/>
+  <configuration Name="Common" c_system_include_directories="$(StudioDir)/include;$(PackagesDir)/include;$(StudioDir)/ctl/include;Z:\\Software\\include" linker_printf_fp_enabled="Yes" linker_scanf_fmt_level="long"/>
 </solution>
