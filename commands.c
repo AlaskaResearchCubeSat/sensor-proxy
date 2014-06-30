@@ -61,18 +61,18 @@ int magCmd(char **argv,unsigned short argc){
         }
         
         if(all){
-            for(i=0;i<12;i++){
+            for(i=0;i<6;i++){
                 //check if reading is valid
-                if(magFlags&(1<<i)){
+                if(magFlags&(1<<(2*i+0)) &&magFlags&(1<<(2*i+1))){
                     //valid, print it
                     if(gauss){
-                        printf("%f ",ADCtoGauss(magMem[i])/2);
+                        printf("%f %f",ADCtoGauss(magMem[i].c.a)/2,ADCtoGauss(magMem[i].c.b)/2);
                     }else{
-                        printf("%li ",magMem[i]);
+                        printf("(%li %li)\t",magMem[i].c.a,magMem[i].c.b);
                     }
                 }else{
-                    //invalid, print NaN
-                    printf("NaN ");
+                    //invalid, print invalid
+                    printf("(### ###)\t");
                 }
             }
             //print newline

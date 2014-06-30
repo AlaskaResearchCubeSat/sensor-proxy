@@ -18,7 +18,7 @@ CTL_EVENT_SET_t sens_ev;
 //the time that the ADC can next be sampled
 CTL_TIME_t adc_ready_time=153;
 
-unsigned short mag_ADC_gain=64;
+unsigned short mag_ADC_gain=1;
 
 //an error occured take appropriat action
 void handle_sensor_error(int error){
@@ -85,7 +85,7 @@ long adc16Val(unsigned char *dat){
   return val;
 }
 
-unsigned long magMem[12];
+MAG_POINT magMem[6];
 unsigned short magFlags;
 
 //LED stuff
@@ -116,9 +116,7 @@ void com_err_LED_off(void){
 //address for magnetomitor        X+   X-   Y+   Y-   Z+   Z-
 const unsigned char mag_addrs[6]={0x14,0x16,0x26,0x34,0x25,0x24};
 //indices for first magnetometer axis
-const int           a_idx[6]    ={4   ,5   ,0   ,1   ,2   ,3   };
-//indices for second magnetometer axis
-const int           b_idx[6]    ={8   ,9   ,10  ,11  ,6   ,7   };
+const int           mag_idx[6]  ={0   ,1   ,2   ,3   ,4   ,5   };
 
 //take a reading from the magnetomitor ADC
 short do_conversion(void){
@@ -208,14 +206,14 @@ short do_conversion(void){
       //turn on error LED
       sens_err_LED_on();
       //clear value
-      magMem[a_idx[i]]=0;
+      magMem[mag_idx[i]].c.a=0;
       //clear valid flag
-      magFlags&=~(1<<a_idx[i]);
+      magFlags&=~(1<<(2*mag_idx[i]));
     }else{
       //get result
-      magMem[a_idx[i]]=adc16Val(rxbuf);
+      magMem[mag_idx[i]].c.a=adc16Val(rxbuf);
       //set valid flag
-      magFlags|= (1<<a_idx[i]);
+      magFlags|= (1<<(2*mag_idx[i]));
     }
   }
   //wait for conversion to complete
@@ -228,14 +226,14 @@ short do_conversion(void){
       //turn on error LED
       sens_err_LED_on();
       //clear value
-      magMem[b_idx[i]]=0;
+      magMem[mag_idx[i]].c.b=0;
       //clear valid flag
-      magFlags&=~(1<<b_idx[i]);
+      magFlags&=~(1<<(2*mag_idx[i]+1));
     }else{
       //get result
-      magMem[b_idx[i]]=adc16Val(rxbuf);
+      magMem[mag_idx[i]].c.b=adc16Val(rxbuf);
       //set valid flag
-      magFlags|= (1<<b_idx[i]);
+      magFlags|= (1<<(2*mag_idx[i]+1));
     }
   }
   //generate reset pulse
@@ -481,50 +479,57 @@ short single_sample(unsigned short addr,long *dest){
 }*/
 
 void ACDS_sensor_interface(void *p) __toplevel{
-  unsigned int e;
-  unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+2+BUS_I2C_CRC_LEN],*ptr;
-  int i,j,res;
-  const char axc[3]={'X','Y','Z'};
-  //initialize event set
-  ctl_events_init(&sens_ev,0);
-  //stop sensors
-  stop_sensors();
-  //event loop
-  for(;;){
-    e=ctl_events_wait(CTL_EVENT_WAIT_ANY_EVENTS_WITH_AUTO_CLEAR,&sens_ev,SENS_EV_READ,CTL_TIMEOUT_NONE,0);
-    if(e&SENS_EV_READ){
-      //read data from magnetomitors
-      res=do_conversion();
-      //check result
-      if(res==0){
-        for(i=0;i<3;i++){
-          printf("%c-Axis :\t",axc[i]);
-          for(j=0;j<4;j++){
-            if(magFlags&(1<<(i*4+j))){
-              printf("%- 12f\t",ADCtoGauss(magMem[i*4+j])/2);
-            }else{
-              printf(" %-11s\t","Error");
+    unsigned int e;
+    unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+2+BUS_I2C_CRC_LEN],*ptr;
+    int i,j,res;
+    const char axc[3]={'X','Y','Z'};
+    //initialize event set
+    ctl_events_init(&sens_ev,0);
+    //stop sensors
+    stop_sensors();
+    //event loop
+    for(;;){
+        e=ctl_events_wait(CTL_EVENT_WAIT_ANY_EVENTS_WITH_AUTO_CLEAR,&sens_ev,SENS_EV_READ,CTL_TIMEOUT_NONE,0);
+        if(e&SENS_EV_READ){
+            //read data from magnetomitors
+            res=do_conversion();
+            //check result
+            if(res==0){
+                for(i=0;i<6;i++){
+                    //print out values from first axis
+                    if(magFlags&(1<<(i*2))){
+                        //value good, print
+                        printf("%- 12f\t",ADCtoGauss(magMem[i].c.a)/2);
+                    }else{
+                        //value not good, print error
+                        printf(" %-11s\t","Error");
+                    }
+                    //print out values form b-axis
+                    if(magFlags&(1<<(i*2+1))){
+                    //value good, print
+                    printf("%- 12f\r\n",ADCtoGauss(magMem[i].c.b)/2);
+                    }else{
+                        //value not good, print error
+                        printf(" %-11s\r\n","Error");
+                    }
+                }
+                //setup packet 
+                ptr=BUS_cmd_init(buff,CMD_MAG_DATA);
+                //add magFlags to packet
+                *(unsigned short*)ptr=magFlags;
+                //copy data into packet
+                memcpy(ptr+2,magMem,sizeof(magMem));
+                //send packet
+                res=BUS_cmd_tx(BUS_ADDR_ACDS,buff,sizeof(magMem)+2,0,BUS_I2C_SEND_FOREGROUND);
+                //check result
+                if(res<0){
+                    report_error(ERR_LEV_ERROR,SENP_ERR_SRC_ACDS_I2C,res,0);
+                    //turn on error LED
+                    com_err_LED_on();
+                }
             }
-          }
-          printf("\r\n");
         }
-        //setup packet 
-        ptr=BUS_cmd_init(buff,CMD_MAG_DATA);
-        //add magFlags to packet
-        *(unsigned short*)ptr=magFlags;
-        //copy data into packet
-        memcpy(ptr+2,magMem,sizeof(magMem));
-        //send packet
-        res=BUS_cmd_tx(BUS_ADDR_ACDS,buff,sizeof(magMem)+2,0,BUS_I2C_SEND_FOREGROUND);
-        //check result
-        if(res<0){
-          report_error(ERR_LEV_ERROR,SENP_ERR_SRC_ACDS_I2C,res,0);
-          //turn on error LED
-          com_err_LED_on();
-        }
-      }
     }
-  }
 }
 
 //count and period to determine mag sampeling

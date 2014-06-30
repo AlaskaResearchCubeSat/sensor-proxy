@@ -30,25 +30,38 @@
   //error codes for sensor functions
   enum{SENS_ERR_SETUP,SENS_ERR_CONV_READ,SENS_ERR_BAD_GAIN,SENS_ERR_INSUFFICIENT_DATA} ;
     
+  //index:    0    1    2    3    4    5
+  //board:    X+   X-   Y+   Y-   Z+   Z- 
+  //a-axis:   Y+   Y-   X-   X+   Y-   Y+
+  //b-axis:   Z+   Z+   Z+   Z+   X-   X+
+    
   //flags for magFLags
-  #define MAG_FLAGS_X0      0x0001
-  #define MAG_FLAGS_X1      0x0002
-  #define MAG_FLAGS_X2      0x0004
-  #define MAG_FLAGS_X3      0x0008
+  #define MAG_FLAGS_X0      (1<<(2*2+0))      //Y+ board a-axis
+  #define MAG_FLAGS_X1      (1<<(2*3+0))      //Y- board a-axis
+  #define MAG_FLAGS_X2      (1<<(2*4+1))      //Z+ board b-axis
+  #define MAG_FLAGS_X3      (1<<(2*5+1))      //Z- board b-axis
   #define MAG_FLAGS_X       (MAG_FLAGS_X0|MAG_FLAGS_X1|MAG_FLAGS_X2|MAG_FLAGS_X3)
   
-  #define MAG_FLAGS_Y0      0x0010
-  #define MAG_FLAGS_Y1      0x0020
-  #define MAG_FLAGS_Y2      0x0040
-  #define MAG_FLAGS_Y3      0x0080
+  #define MAG_FLAGS_Y0      (1<<(2*0+0))      //X+ board a-axis
+  #define MAG_FLAGS_Y1      (1<<(2*1+0))      //X- board a-axis
+  #define MAG_FLAGS_Y2      (1<<(2*4+0))      //Z+ board a-axis
+  #define MAG_FLAGS_Y3      (1<<(2*5+0))      //Z- board a-axis
   #define MAG_FLAGS_Y       (MAG_FLAGS_Y0|MAG_FLAGS_Y1|MAG_FLAGS_Y2|MAG_FLAGS_Y3)
   
-  #define MAG_FLAGS_Z0      0x0100
-  #define MAG_FLAGS_Z1      0x0200
-  #define MAG_FLAGS_Z2      0x0400
-  #define MAG_FLAGS_Z3      0x0800
+  #define MAG_FLAGS_Z0      (1<<(2*0+1))      //X+ board b-axis    
+  #define MAG_FLAGS_Z1      (1<<(2*1+1))      //X- board b-axis
+  #define MAG_FLAGS_Z2      (1<<(2*2+1))      //Y+ board b-axis
+  #define MAG_FLAGS_Z3      (1<<(2*3+1))      //Y- board b-axis
   #define MAG_FLAGS_Z       (MAG_FLAGS_Z0|MAG_FLAGS_Z1|MAG_FLAGS_Z2|MAG_FLAGS_Z3)
 
+  
+  //magnetometer point
+    typedef union{
+      struct {
+        long a,b;
+      }c;
+      long elm[2];
+    } MAG_POINT;
   
   //TESTING: trigger a sensor read
   void trigger_read(void);
@@ -61,7 +74,7 @@
 
   short do_conversion(void);
 
-  extern unsigned long magMem[12];
+  extern MAG_POINT magMem[6];
   extern unsigned short magFlags;
 
 
