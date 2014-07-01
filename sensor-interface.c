@@ -11,6 +11,7 @@
 #include "sensor-interface.h"
 #include "Error_src.h"
 #include "Z:\Software\ADCS\ACDS-flight\SensorDataInterface.h"
+#include <limits.h>
 
 
 CTL_EVENT_SET_t sens_ev;
@@ -44,7 +45,7 @@ void trigger_read(void){
   
 
 //convert ADC value to voltage
-float ADCtoV(long adc){
+float ADCtoV(short adc){
   //TODO: maybe allow other references
   return ((float)adc)*3.3/(2*65535.0);
 }
@@ -56,30 +57,22 @@ float ADCtoGauss(long adc){
 
 
 //convert returned data from 16bit LTC24xx ADC into a signed long integer
-long adc16Val(unsigned char *dat){
-  long val;
+short adc16Val(unsigned char *dat){
+  short val;
   short sig,msb;
   //extract magnitude bits from data
-  //val=(((unsigned long)dat[0])<<(16-6))|(((unsigned long)dat[1])<<(8-6))|((unsigned long)dat[2]>>6);
-  val=(((unsigned long)dat[0])<<16)|(((unsigned long)dat[1])<<8)|((unsigned long)dat[2]);
-  val>>=6;
+  val=(((unsigned short)dat[0])<<(16-6))|(((unsigned short)dat[1])<<(8-6))|((unsigned short)dat[2]>>6);
   //check sign bit
-  sig=!!(val&(0x20000));
+  sig=!!(dat[0]&(0x80));
   //check MSB bit
-  msb=!!(val&(0x10000));
-  //remove MSB and sig bits
-  val&=~0x30000;
-  //check for negative values
-  if(!sig){
-    val|=0xFFFF0000;
-  }
+  msb=!!(dat[0]&(0x40));
   //check for positive overflow
   if(msb && sig && val!=0){
-    return 65536;
+    return SHRT_MAX;
   }
   //check for negative overflow
   if(!msb && !sig && val!=0){
-    return -65536;
+    return SHRT_MIN;
   }
 
   return val;

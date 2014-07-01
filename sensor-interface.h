@@ -58,9 +58,9 @@
   //magnetometer point
     typedef union{
       struct {
-        long a,b;
+        short a,b;
       }c;
-      long elm[2];
+      short elm[2];
     } MAG_POINT;
   
   //TESTING: trigger a sensor read
