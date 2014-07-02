@@ -67,6 +67,13 @@ int SUB_parseCmd(unsigned char src,unsigned char cmd,unsigned char *dat,unsigned
           stop_sensors();
           //success!
           return RET_SUCCESS;
+        case MAG_SINGLE_SAMPLE:
+          if(len!=1){
+            return ERR_PK_LEN;
+          }
+          sensors_single_sample();
+          //success!
+          return RET_SUCCESS;
       }
   }
   //Return Error

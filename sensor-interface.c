@@ -243,7 +243,7 @@ short do_conversion(void){
     //report error
     report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_INSUFFICIENT_DATA,magFlags);
     //TODO: provide real return codes
-    return -1;
+    return 0;
   }
 }
 
@@ -556,6 +556,13 @@ void stop_sensors(void){
   //turn off error LED's
   com_err_LED_off();
   sens_err_LED_off();
+}
+
+void sensors_single_sample(void){
+    //stop sensors
+    stop_sensors();
+    //send a sensor event
+    ctl_events_set_clear(&sens_ev,SENS_EV_READ,0);
 }
 
 //Timer A1 interrupt
