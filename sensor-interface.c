@@ -61,7 +61,7 @@ short adc16Val(unsigned char *dat){
   short val;
   short sig,msb;
   //extract magnitude bits from data
-  val=(((unsigned short)dat[0])<<(16-6))|(((unsigned short)dat[1])<<(8-6))|((unsigned short)dat[2]>>6);
+  val=(((unsigned short)dat[0])<<(16-7))|(((unsigned short)dat[1])<<(8-7))|((unsigned short)dat[2]>>7);
   //check sign bit
   sig=!!(dat[0]&(0x80));
   //check MSB bit
