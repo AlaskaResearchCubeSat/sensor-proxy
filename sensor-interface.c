@@ -251,6 +251,10 @@ short single_sample(unsigned short addr,short *dest){
   unsigned char rxbuf[4],txbuf[4];
   int res;
   CTL_TIME_t ct;
+  //generate set pulse
+  MAG_SR_OUT|=MAG_SR_PIN;
+  //delay for pulse
+  ctl_timeout_wait(ctl_get_current_time()+2);
   //get current time
   ct=ctl_get_current_time();
   //check if ADC is ready
@@ -292,6 +296,8 @@ short single_sample(unsigned short addr,short *dest){
       break;
       default:
         report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_BAD_GAIN,mag_ADC_gain);
+        //generate reset pulse
+        MAG_SR_OUT&=~MAG_SR_PIN;
         return 1;
     }
   #endif  
@@ -309,6 +315,8 @@ short single_sample(unsigned short addr,short *dest){
       report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_SETUP,res);
       //turn on error LED
       sens_err_LED_on();
+      //generate reset pulse
+      MAG_SR_OUT&=~MAG_SR_PIN;
       //turn LED off, done measuring
       meas_LED_off();
       //TODO : provide real error codes
@@ -325,6 +333,8 @@ short single_sample(unsigned short addr,short *dest){
     report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
     //turn on error LED
     sens_err_LED_on();
+    //generate reset pulse
+    MAG_SR_OUT&=~MAG_SR_PIN;
     //turn LED off, done measuring
     meas_LED_off();
     //TODO : provide real error codes
@@ -340,6 +350,8 @@ short single_sample(unsigned short addr,short *dest){
     report_error(ERR_LEV_ERROR,SENP_ERR_SRC_SENSOR_I2C,SENS_ERR_CONV_READ,res);
     //turn on error LED
     sens_err_LED_on();
+    //generate reset pulse
+    MAG_SR_OUT&=~MAG_SR_PIN;
     //turn LED off, done measuring
     meas_LED_off();
     //TODO : provide real error codes
@@ -347,6 +359,8 @@ short single_sample(unsigned short addr,short *dest){
   }
   //save result
   dest[1]=adc16Val(rxbuf);
+  //generate reset pulse
+  MAG_SR_OUT&=~MAG_SR_PIN;
   //turn LED off, done measuring
   meas_LED_off();
   //get time that ADC can next be read
