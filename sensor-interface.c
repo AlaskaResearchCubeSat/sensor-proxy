@@ -492,7 +492,7 @@ void ACDS_sensor_interface(void *p) __toplevel{
                     //print out values from first axis
                     if(magFlags&(1<<(i*2))){
                         //value good, print
-                        printf("%- 12f\t",ADCtoGauss(magMem[i].c.a)/2);
+                        printf("%- 11i\t",magMem[i].c.a);
                     }else{
                         //value not good, print error
                         printf(" %-11s\t","Error");
@@ -500,7 +500,7 @@ void ACDS_sensor_interface(void *p) __toplevel{
                     //print out values form b-axis
                     if(magFlags&(1<<(i*2+1))){
                     //value good, print
-                    printf("%- 12f\r\n",ADCtoGauss(magMem[i].c.b)/2);
+                    printf("%- 11i\r\n",magMem[i].c.b);
                     }else{
                         //value not good, print error
                         printf(" %-11s\r\n","Error");
