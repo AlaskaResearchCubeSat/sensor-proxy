@@ -25,7 +25,7 @@ int magCmd(char **argv,unsigned short argc){
   signed short set[2],reset[2],os[2],val[2];
   unsigned short single=0,gauss=0,addr=0x14,all=0;
   unsigned char c,mag_addr=0x14;
-  long result[2];
+  short result[2];
   float time=0;
   int i,res;
 
@@ -68,7 +68,7 @@ int magCmd(char **argv,unsigned short argc){
                     if(gauss){
                         printf("%f %f",ADCtoGauss(magMem[i].c.a)/2,ADCtoGauss(magMem[i].c.b)/2);
                     }else{
-                        printf("(%li %li)\t",magMem[i].c.a,magMem[i].c.b);
+                        printf("(%i %i)\t",magMem[i].c.a,magMem[i].c.b);
                     }
                 }else{
                     //invalid, print invalid
@@ -81,7 +81,7 @@ int magCmd(char **argv,unsigned short argc){
             if(gauss){
                 printf("%f %f\r\n",ADCtoGauss(result[0])/2,ADCtoGauss(result[1])/2);
             }else{
-                printf("%li %li\r\n",result[0],result[1]);
+                printf("%i %i\r\n",result[0],result[1]);
             }
         }
         c=UCA1_CheckKey();
@@ -113,7 +113,7 @@ int stop_sensors_Cmd(char **argv,unsigned short argc){
 
 int SR_Cmd(char **argv,unsigned short argc){
   unsigned char addr=0x14;
-  long dat[4];
+  short dat[4];
   if(argc>1){
     printf("Error : Too many arguments\r\n");
     return -1;
@@ -143,7 +143,7 @@ int SR_Cmd(char **argv,unsigned short argc){
     return -2;
   }
   //print sample 
-  printf("%li\t%li\t%li\t%li\r\n",dat[0],dat[1],dat[2],dat[3]);
+  printf("% i\t% i\t% i\t% i\r\n",dat[0],dat[1],dat[2],dat[3]);
   return 0;
 }
 

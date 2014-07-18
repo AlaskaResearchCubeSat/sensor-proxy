@@ -84,7 +84,7 @@
 
   void sensors_single_sample(void);
 
-  short single_sample(unsigned short addr,long *dest);
+  short single_sample(unsigned short addr,short *dest);
 
   extern unsigned short mag_ADC_gain;
 

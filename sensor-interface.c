@@ -249,7 +249,7 @@ short do_conversion(void){
 
 
 //take a reading from the magnetomitor ADC
-short single_sample(unsigned short addr,long *dest){
+short single_sample(unsigned short addr,short *dest){
   unsigned char rxbuf[4],txbuf[4];
   int res;
   CTL_TIME_t ct;
