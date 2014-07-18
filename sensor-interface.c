@@ -108,8 +108,6 @@ void com_err_LED_off(void){
 
 //address for magnetomitor        X+   X-   Y+   Y-   Z+   Z-
 const unsigned char mag_addrs[6]={0x14,0x16,0x26,0x34,0x25,0x24};
-//indices for first magnetometer axis
-const int           mag_idx[6]  ={0   ,1   ,2   ,3   ,4   ,5   };
 
 //take a reading from the magnetomitor ADC
 short do_conversion(void){
@@ -199,14 +197,14 @@ short do_conversion(void){
       //turn on error LED
       sens_err_LED_on();
       //clear value
-      magMem[mag_idx[i]].c.a=0;
+      magMem[i].c.a=0;
       //clear valid flag
-      magFlags&=~(1<<(2*mag_idx[i]));
+      magFlags&=~(1<<(2*i));
     }else{
       //get result
-      magMem[mag_idx[i]].c.a=adc16Val(rxbuf);
+      magMem[i].c.a=adc16Val(rxbuf);
       //set valid flag
-      magFlags|= (1<<(2*mag_idx[i]));
+      magFlags|= (1<<(2*i));
     }
   }
   //wait for conversion to complete
@@ -219,14 +217,14 @@ short do_conversion(void){
       //turn on error LED
       sens_err_LED_on();
       //clear value
-      magMem[mag_idx[i]].c.b=0;
+      magMem[i].c.b=0;
       //clear valid flag
-      magFlags&=~(1<<(2*mag_idx[i]+1));
+      magFlags&=~(1<<(2*i+1));
     }else{
       //get result
-      magMem[mag_idx[i]].c.b=adc16Val(rxbuf);
+      magMem[i].c.b=adc16Val(rxbuf);
       //set valid flag
-      magFlags|= (1<<(2*mag_idx[i]+1));
+      magFlags|= (1<<(2*i+1));
     }
   }
   //generate reset pulse
