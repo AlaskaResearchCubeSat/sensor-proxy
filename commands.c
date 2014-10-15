@@ -114,6 +114,7 @@ int stop_sensors_Cmd(char **argv,unsigned short argc){
 int SR_Cmd(char **argv,unsigned short argc){
   unsigned char addr=0x14;
   short dat[4];
+  short offset[2],val[2];
   if(argc>1){
     printf("Error : Too many arguments\r\n");
     return -1;
@@ -124,12 +125,16 @@ int SR_Cmd(char **argv,unsigned short argc){
       return -1;
     }
   }
+  //generate reset pulse
+  MAG_SR_OUT&=~MAG_SR_PIN;
+  //delay for pulse
+  ctl_timeout_wait(ctl_get_current_time()+5);
   //generate set pulse
   MAG_SR_OUT|=MAG_SR_PIN;
   //delay for pulse
   ctl_timeout_wait(ctl_get_current_time()+2);
   //take a sample
-  if(!single_sample(addr,dat)){
+  if(single_sample(addr,dat)){
     printf("Error with read. Aborting\r\n");
     return -1;
   }
@@ -138,12 +143,19 @@ int SR_Cmd(char **argv,unsigned short argc){
   //delay for pulse
   ctl_timeout_wait(ctl_get_current_time()+2);
   //take a sample
-  if(!single_sample(addr,dat+2)){
+  if(single_sample(addr,dat+2)){
     printf("Error reading sample\r\n");
     return -2;
   }
+  offset[0]=((long)dat[0]+(long)dat[2])>>1;
+  offset[1]=((long)dat[1]+(long)dat[3])>>1;
+  val[0]=((long)dat[0]-(long)dat[2])>>1;
+  val[1]=((long)dat[1]-(long)dat[3])>>1;
   //print sample 
-  printf("% i\t% i\t% i\t% i\r\n",dat[0],dat[1],dat[2],dat[3]);
+  printf("set\t% i\t% i\r\n",dat[0],dat[1]);
+  printf("reset\t% i\t% i\r\n",dat[2],dat[3]);
+  printf("offset\t% i\t% i\r\n",offset[0],offset[1]);
+  printf("value\t% i\t% i\r\n",val[0],val[1]);
   return 0;
 }
 
