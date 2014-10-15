@@ -538,8 +538,7 @@ void ACDS_sensor_interface(void *p) __toplevel{
 }
 
 //count and period to determine mag sampeling
-unsigned short mag_period;
-unsigned short mag_count;
+MAG_TIME mag_time;
 
 //running interrupt count 
 static short int_count;
@@ -547,9 +546,9 @@ static short int_count;
 //start sampling timer for magnetomitor 
 void run_sensors(unsigned short time,short count){
   //set period
-  mag_period=time;
+  mag_time.T=time;
   //set count
-  mag_count=count;
+  mag_time.n=count;
   //initialize interrupt count
   int_count=count;
   //set interupt time
@@ -583,12 +582,12 @@ void timerA1(void) __ctl_interrupt[TIMERA1_VECTOR]{
     //CCR1 : used for magnetomitor timing
     case TAIV_TACCR1:
       //setup next interrupt
-      TACCR1+=mag_period;
+      TACCR1+=mag_time.T;
       //decremint count
       int_count--;
       if(int_count<=0){
         ctl_events_set_clear(&sens_ev,SENS_EV_READ,0);
-        int_count=mag_count;
+        int_count=mag_time.n;
       }
     break;
     //CCR2 : Unused

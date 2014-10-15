@@ -62,6 +62,12 @@
       }c;
       short elm[2];
     } MAG_POINT;
+
+    //Interrupt timing for magnetometer
+    typedef struct{
+        unsigned short T;       //period
+        unsigned short n;       //count
+    }MAG_TIME;
   
   //TESTING: trigger a sensor read
   void trigger_read(void);
