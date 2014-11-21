@@ -106,10 +106,10 @@ void com_err_LED_off(void){
   P7OUT&=~BIT4;
 }
 
-//address for magnetomitor        X+   X-   Y+   Y-   Z+   Z-
+//address for magnetometer        X+   X-   Y+   Y-   Z+   Z-
 const unsigned char mag_addrs[6]={0x14,0x16,0x26,0x34,0x25,0x24};
 
-//take a reading from the magnetomitor ADC
+//take a reading from the magnetometer ADC
 short do_conversion(void){
   long aval,bval;
   unsigned char rxbuf[4],txbuf[4];
@@ -369,7 +369,7 @@ short single_sample(unsigned short addr,short *dest){
   return 0;
 }
 
-//take a reading from the magnetomitor ADC
+//take a reading from the magnetometer ADC
 /*short do_conversion(void){
   long aval[2],bval[2];
   unsigned char rxbuf[4],txbuf[4];
@@ -496,7 +496,7 @@ void ACDS_sensor_interface(void *p) __toplevel{
     for(;;){
         e=ctl_events_wait(CTL_EVENT_WAIT_ANY_EVENTS_WITH_AUTO_CLEAR,&sens_ev,SENS_EV_READ,CTL_TIMEOUT_NONE,0);
         if(e&SENS_EV_READ){
-            //read data from magnetomitors
+            //read data from magnetometers
             res=do_conversion();
             //check result
             if(res==0){
@@ -537,13 +537,13 @@ void ACDS_sensor_interface(void *p) __toplevel{
     }
 }
 
-//count and period to determine mag sampeling
+//count and period to determine mag sampling
 MAG_TIME mag_time;
 
 //running interrupt count 
 static short int_count;
 
-//start sampling timer for magnetomitor 
+//start sampling timer for magnetometer 
 void run_sensors(unsigned short time,short count){
   //set period
   mag_time.T=time;
@@ -551,7 +551,7 @@ void run_sensors(unsigned short time,short count){
   mag_time.n=count;
   //initialize interrupt count
   int_count=count;
-  //set interupt time
+  //set interrupt time
   TACCR1=readTA()+time;
   //enable interrupt
   TACCTL1=CCIE;
@@ -560,7 +560,7 @@ void run_sensors(unsigned short time,short count){
   sens_err_LED_off();
 }
 
-//stop sampling magnetomitor
+//stop sampling magnetometer
 void stop_sensors(void){
   //disable interrupt
   TACCTL1=0;
@@ -579,11 +579,11 @@ void sensors_single_sample(void){
 //Timer A1 interrupt
 void timerA1(void) __ctl_interrupt[TIMERA1_VECTOR]{
   switch(TAIV){
-    //CCR1 : used for magnetomitor timing
+    //CCR1 : used for magnetometer timing
     case TAIV_TACCR1:
       //setup next interrupt
       TACCR1+=mag_time.T;
-      //decremint count
+      //decrement count
       int_count--;
       if(int_count<=0){
         ctl_events_set_clear(&sens_ev,SENS_EV_READ,0);
