@@ -483,6 +483,8 @@ short single_sample(unsigned short addr,short *dest){
   return 0;
 }*/
 
+unsigned char mag_tx_addr=BUS_ADDR_ACDS;
+
 void ACDS_sensor_interface(void *p) __toplevel{
     unsigned int e;
     unsigned char buff[BUS_I2C_HDR_LEN+sizeof(magMem)+2+BUS_I2C_CRC_LEN],*ptr;
@@ -525,7 +527,7 @@ void ACDS_sensor_interface(void *p) __toplevel{
                 //copy data into packet
                 memcpy(ptr+2,magMem,sizeof(magMem));
                 //send packet
-                res=BUS_cmd_tx(BUS_ADDR_ACDS,buff,sizeof(magMem)+2,0,BUS_I2C_SEND_FOREGROUND);
+                res=BUS_cmd_tx(mag_tx_addr,buff,sizeof(magMem)+2,0,BUS_I2C_SEND_FOREGROUND);
                 //check result
                 if(res<0){
                     report_error(ERR_LEV_ERROR,SENP_ERR_SRC_ACDS_I2C,res,0);

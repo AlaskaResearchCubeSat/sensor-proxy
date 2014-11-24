@@ -76,6 +76,22 @@ int SUB_parseCmd(unsigned char src,unsigned char cmd,unsigned char *dat,unsigned
           sensors_single_sample();
           //success!
           return RET_SUCCESS;
+        case MAG_TEST_MODE_ON:
+          //check packet length
+          if(len!=1){
+            //incorrect length
+            return ERR_PK_LEN;
+          }
+          mag_tx_addr=BUS_ADDR_CDH;
+          return RET_SUCCESS;  
+        case MAG_TEST_MODE_OFF:
+          //check packet length
+          if(len!=1){
+            //incorrect length
+            return ERR_PK_LEN;
+          }
+          mag_tx_addr=BUS_ADDR_ACDS;
+          return RET_SUCCESS;
       }
   }
   //Return Error

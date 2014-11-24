@@ -93,5 +93,7 @@
   short single_sample(unsigned short addr,short *dest);
 
   extern unsigned short mag_ADC_gain;
+  
+  extern unsigned char mag_tx_addr;
 
 #endif
