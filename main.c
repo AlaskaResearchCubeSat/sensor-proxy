@@ -68,7 +68,9 @@ int SUB_parseCmd(unsigned char src,unsigned char cmd,unsigned char *dat,unsigned
           //success!
           return RET_SUCCESS;
         case MAG_SINGLE_SAMPLE:
+          //check packet length
           if(len!=1){
+            //incorrect length
             return ERR_PK_LEN;
           }
           sensors_single_sample();
