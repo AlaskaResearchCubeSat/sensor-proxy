@@ -189,6 +189,9 @@ int main(void){
   error_init();
   //TESTING: set log level to report everything by default
   set_error_level(0);
+     
+  //disable timesliceing so that communication is possible without CDH
+  BUS_set_test_mode(BUS_TM_NO_TIMESLICE);
   
   //setup P7 for LED's
   P7OUT=0x80;
